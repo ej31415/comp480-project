@@ -7,13 +7,18 @@
 - all the structures that we will be using (bloom filters, consistent hashing, etc.) will be in src/structures
     - for each, implement at least the following functions:
     ```
-    def Insert(self, item)->bool:
+    def insert(self, item)->bool:
         # adds item into self
         # returns success/failure? can decide later
     
-    def Query(self, item)->int:
+    def query(self, item)->int:
         # gets the count of item stored in self
         # returns the count
+    
+    def size(self):
+        # gets the size of this structure
+        # make sure to add the space occupied by the private members
+        # returns the number of bytes
     ```
 - the following structures will be implemented:
     - cuckoo filter
@@ -32,3 +37,9 @@
 - the storage system that we will be using
 - essentially an object that uses defined structures to store data
 - should support reading in a file that contains the data that we want to store (for now)
+
+### tests
+- all tests will be in this folder
+- you might need to add ```sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "../../src")``` before importing from ```src/structures``` because Python is a bit silly
+- runtests.bat (Windows) and runtests.sh(Linux/Unix/macOS) will run all the tests and show coverage details
+    - not too sure if runtests.sh will work with mac to be honest; never worked with macOS
