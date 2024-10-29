@@ -22,6 +22,7 @@ class BloomFilterSimple:
         self.__key_num = key_num
         self.__generate_bit_array()
         self.__generate_hash_functions()
+        logger.info("Initialized a simple bloom filter...")
 
     def __generate_bit_array(self):
         '''Generates the bit array for the bloom filter during initialization.'''
@@ -77,15 +78,16 @@ class BloomFilterSimple:
         return True # honestly not sure when to return False
     
     def query(self, item)->int:
-        """Checks the bloom filter for a given item's existence
+        """Checks the bloom filter for a given item's existence.
         
         Returns 1 if exists, 0 otherwise.
         """
-        logger.debug("Querying item")
         for hash_function in self.__hash_functions:
             hashed_key = hash_function(item)
             if self.__bit_array[hashed_key] == 0:
+                logger.debug("Item is not found")
                 return 0
+        logger.debug("Item is found")
         return 1
     
     def size(self)->int:
