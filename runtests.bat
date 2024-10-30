@@ -2,5 +2,5 @@
 echo Running tests...
 
 cd tests
-python -m coverage run -m unittest
+python -m coverage run -m unittest -v
 python -m coverage report
