@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 
 # Set up logging
 logger = logging.getLogger()
@@ -9,7 +10,9 @@ class BST:
     BST represents a binary search tree.
     A binary search tree is consisted of a root node, which defines the BST.
     Each node in the tree has a key and two children nodes, where the key of the left child is strictly less than the key of this node
-    while the key of the right child is strictly greater than the key of this node. All keys must be unique in the BST."""
+    while the key of the right child is strictly greater than the key of this node. All keys must be unique in the BST.
+    One key assumption is that the keys stored in into a BST are comparable by `>` and `<`.
+    """
     
     class Node:
         """
@@ -38,6 +41,7 @@ class BST:
         
         def get_parent(self):
             '''Returns the parent of this node.'''
+            return self.__parent
         
         def set_left_child(self, node):
             '''Sets this node's left child.'''
@@ -67,9 +71,9 @@ class BST:
                 count += self.__right.get_subtree_size()
             return count
         
-    def __init__(self):
+    def __init__(self, root=None):
         '''Initializes the tree by setting the root node to None and the size to 0.'''
-        self.__root = None
+        self.__root = root
         logger.info("Initialized a binary search tree...")
 
     def __transplant(self, u, v):
@@ -101,13 +105,27 @@ class BST:
     #         next = next.get_parent()
     #     return next
 
+    def __traverse_helper(self, node):
+        '''Gets the keys of all nodes into a list, using inorder traversal.'''
+        if node != None:
+            return np.concatenate((self.__traverse_helper(node.get_left_child()), [node.get_key()], self.__traverse_helper(node.get_right_child())))
+        return []
+
     def get_root(self):
         '''Returns the root node of the BST.'''
         return self.__root
     
     def get_size(self):
         '''Returns the number of the nodes in the BST.'''
+        if self.__root == None:
+            return 0
         return self.__root.get_subtree_size()
+    
+    def get_keys_as_list(self):
+        '''Returns a list of the keys of all nodes in the BST, in order.'''
+        curr = self.__root
+        node_keys = self.__traverse_helper(curr)
+        return node_keys
     
     def insert(self, item)->bool:
         """Inserts a given item into the BST as a node.
@@ -187,10 +205,8 @@ class BST:
         If the given item does not exist in the BST as a node key, the function returns None.
         """
         # Search for appropriate location
-        prev = None
         curr = self.__root
         while curr != None:
-            prev = curr
             curr_key = curr.get_key()
             if item < curr_key:
                 curr = curr.get_left_child()
@@ -204,12 +220,7 @@ class BST:
             logger.debug("Target node is NOT found")
             return None
 
-        # Remove node and its subtree from the BST
-        if curr == prev.get_left_child():
-            prev.set_left_child(None)
-        else:
-            prev.set_right_child(None)
-
+        # Remove node and maybe its subtree from the BST
         if not subtree:
             if curr.get_left_child() == None:
                 self.__transplant(curr, curr.get_right_child())
@@ -217,14 +228,20 @@ class BST:
                 self.__transplant(curr, curr.get_left_child())
             else:
                 successor = curr.get_right_child().min_node()
-                if successor.parent() != curr:
+                if successor.get_parent() != curr:
                     self.__transplant(successor, successor.get_right_child())
-                    successor.set_right_child() = curr.get_right_child()
-                    successor.get_right_child().set_parent() = successor
+                    successor.set_right_child(curr.get_right_child())
+                    successor.get_right_child().set_parent(successor)
                 self.__transplant(curr, successor)
-                successor.set_left_child() = curr.get_left_child()
-                successor.get_left_child().set_parent() = successor
+                successor.set_left_child(curr.get_left_child())
+                successor.get_left_child().set_parent(successor)
             curr.set_left_child(None)
             curr.set_right_child(None)
+        else:
+            if curr == curr.get_parent().get_left_child():
+                curr.get_parent().set_left_child(None)
+            else:
+                curr.get_parent().set_right_child(None)
+        curr.set_parent(None)
         logger.debug("Target node is removed, removing subtree is %s", subtree)
         return curr
