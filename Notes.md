@@ -43,3 +43,4 @@
 - you might need to add ```sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "../../src")``` before importing from ```src/structures``` because Python is a bit silly
 - runtests.bat (Windows) and runtests.sh(Linux/Unix/macOS) will run all the tests and show coverage details
     - not too sure if runtests.sh will work with mac to be honest; never worked with macOS
+- test a single unittest: ```python -m unittest test_package.test_module.TestClass.test_method -v```

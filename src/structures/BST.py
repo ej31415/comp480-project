@@ -72,7 +72,7 @@ class BST:
             return count
         
     def __init__(self, root=None):
-        '''Initializes the tree by setting the root node to None and the size to 0.'''
+        '''Initializes the tree by setting the root node to None.'''
         self.__root = root
         logger.info("Initialized a binary search tree...")
 
@@ -108,7 +108,7 @@ class BST:
     def __traverse_helper(self, node):
         '''Gets the keys of all nodes into a list, using inorder traversal.'''
         if node != None:
-            return np.concatenate((self.__traverse_helper(node.get_left_child()), [node.get_key()], self.__traverse_helper(node.get_right_child())))
+            return np.concatenate((self.__traverse_helper(node.get_left_child()), [node], self.__traverse_helper(node.get_right_child())))
         return []
 
     def get_root(self):
@@ -121,7 +121,7 @@ class BST:
             return 0
         return self.__root.get_subtree_size()
     
-    def get_keys_as_list(self):
+    def get_nodes_as_list(self):
         '''Returns a list of the keys of all nodes in the BST, in order.'''
         curr = self.__root
         node_keys = self.__traverse_helper(curr)
@@ -166,7 +166,6 @@ class BST:
         
         Returns 1 if exists, 0 otherwise.
         """
-
         curr = self.__root
         while curr != None:
             curr_key = curr.get_key()
@@ -175,9 +174,9 @@ class BST:
             elif item > curr_key:
                 curr = curr.get_right_child()
             else:
-                logger.debug("Item is not found")
+                logger.debug("Item is found")
                 return 1
-        logger.debug("Item is found")
+        logger.debug("Item is not found")
         return 0
     
     def get(self, item):

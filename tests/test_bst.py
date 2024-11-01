@@ -13,14 +13,14 @@ class TestBST(unittest.TestCase):
     
     def test_empty_bst(self):
         self.assertEqual(0, self.bst.get_size())
-        self.assertCountEqual([], self.bst.get_keys_as_list())
+        self.assertCountEqual([], self.bst.get_nodes_as_list())
         self.assertEqual(0, self.bst.query(0))
         self.assertEqual(None, self.bst.get(0))
     
     def test_insert(self):
         self.bst.insert(1)
         self.assertEqual(1, self.bst.get_size())
-        self.assertCountEqual([1], self.bst.get_keys_as_list())
+        self.assertCountEqual([1], [n.get_key() for n in self.bst.get_nodes_as_list()])
         self.assertEqual(0, self.bst.query(0))
         self.assertEqual(1, self.bst.query(1))
     
@@ -29,7 +29,7 @@ class TestBST(unittest.TestCase):
         for key in keys:
             self.bst.insert(key)
         self.assertEqual(len(keys), self.bst.get_size())
-        self.assertCountEqual(np.sort(keys), self.bst.get_keys_as_list())
+        self.assertCountEqual(np.sort(keys), [n.get_key() for n in self.bst.get_nodes_as_list()])
         for key in keys:
             self.assertEqual(1, self.bst.query(key))
 
@@ -65,7 +65,7 @@ class TestBST(unittest.TestCase):
         self.assertEqual(None, removed_node.get_left_child())
         self.assertEqual(None, removed_node.get_right_child())
         self.assertEqual(None, removed_node.get_parent())
-        self.assertCountEqual([0, 1, 2, 3, 4, 6, 7, 8, 9], self.bst.get_keys_as_list())
+        self.assertCountEqual([0, 1, 2, 3, 4, 6, 7, 8, 9], [n.get_key() for n in self.bst.get_nodes_as_list()])
     
     def test_remove_nonexistent(self):
         node = self.bst.remove(0)
@@ -77,8 +77,8 @@ class TestBST(unittest.TestCase):
             self.bst.insert(key)
         removed_node = self.bst.remove(5, subtree=True)
         removed_tree = BST(removed_node)
-        self.assertCountEqual([0, 1, 2, 3, 4], self.bst.get_keys_as_list())
-        self.assertCountEqual([5, 6, 7, 8, 9], removed_tree.get_keys_as_list())
+        self.assertCountEqual([0, 1, 2, 3, 4], [n.get_key() for n in self.bst.get_nodes_as_list()])
+        self.assertCountEqual([5, 6, 7, 8, 9], [n.get_key() for n in removed_tree.get_nodes_as_list()])
     
     def test_remove_all(self):
         keys = np.arange(0, 10, 1)
@@ -93,19 +93,19 @@ class TestBST(unittest.TestCase):
         for key in keys:
             self.bst.insert(key)
         self.bst.remove(1)
-        self.assertCountEqual([2, 3], self.bst.get_keys_as_list())
+        self.assertCountEqual([2, 3], [n.get_key() for n in self.bst.get_nodes_as_list()])
         self.bst.remove(3)
-        self.assertCountEqual([2], self.bst.get_keys_as_list())
+        self.assertCountEqual([2], [n.get_key() for n in self.bst.get_nodes_as_list()])
     
     def test_balanced(self):
         keys = [5, 3, 1, 2, 4, 7, 6, 8, 9]
         for key in keys:
             self.bst.insert(key)
         keys = np.sort(keys).tolist()
-        self.assertCountEqual(keys, self.bst.get_keys_as_list())
+        self.assertCountEqual(keys, [n.get_key() for n in self.bst.get_nodes_as_list()])
         remove_order = [2, 5, 1, 8, 3, 4, 9]
         for value in remove_order:
             keys.remove(value)
             self.bst.remove(value)
-            self.assertCountEqual(keys, self.bst.get_keys_as_list())
+            self.assertCountEqual(keys, [n.get_key() for n in self.bst.get_nodes_as_list()])
         
