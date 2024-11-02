@@ -188,50 +188,59 @@ class RBTree:
 
     def __remove_fixup(self, node, parent, left):
         '''Helper function to maintain RBTree invariants for node removal.'''
-        print(f"Fixup node key: {node.get_key()}, parent: {node.get_parent().get_key()}, left child: {node.get_left_child() != None}, right child: {node.get_right_child() != None}, is left child: {left}")
-        while node != self.__root and node.get_color() == "black":
+        print(f"Replacing with {None if node == None else node.get_key()}, where left={left} and color={'black' if node == None else node.get_color()}")
+        while node != self.__root and (node == None or node.get_color() == "black"):
             if left:
                 sibling = parent.get_right_child()
-                if sibling.get_color() == "red":
+                if sibling != None and sibling.get_color() == "red":
                     sibling.set_color("black")
-                    node.get_parent().set_color("red")
-                    self.__left_rotate(node.get_parent())
-                    sibling = node.find_sibling()
+                    parent.set_color("red")
+                    self.__left_rotate(parent)
+                    sibling = parent.get_right_child()
                 if (sibling.get_left_child() == None or sibling.get_left_child().get_color() == "black") and (sibling.get_right_child() == None or sibling.get_right_child().get_color() == "black"):
                     sibling.set_color("red")
-                    node = node.get_parent()
-                elif sibling.get_right_child() == None or sibling.get_right_child().get_color() == "black":
-                    sibling.get_left_child().set_color("black")
-                    sibling.set_color("red")
-                    self.__right_rotate(sibling)
-                    sibling = node.find_sibling()
-                sibling.set_color(node.get_parent().get_color())
-                node.get_parent().set_color("black")
-                if sibling.get_right_child() != None:
-                    sibling.get_right_child().set_color("black")
-                self.__left_rotate(node.get_parent())
-                node = self.__root
+                    node = parent
+                    parent = parent.get_parent()
+                    if parent != None and parent.get_right_child() == node:
+                        left = False
+                else:
+                    if sibling.get_right_child() == None or sibling.get_right_child().get_color() == "black":
+                        sibling.get_left_child().set_color("black")
+                        sibling.set_color("red")
+                        self.__right_rotate(sibling)
+                        sibling = parent.get_right_child()
+                    sibling.set_color(parent.get_color())
+                    parent.set_color("black")
+                    if sibling.get_right_child() != None:
+                        sibling.get_right_child().set_color("black")
+                    self.__left_rotate(parent)
+                    node = self.__root
             else:
-                sibling = node.find_sibling()
-                if sibling.get_color() == "red":
+                sibling = parent.get_left_child()
+                if sibling != None and sibling.get_color() == "red":
                     sibling.set_color("black")
-                    node.get_parent().set_color("red")
-                    self.__right_rotate(node.get_parent())
-                    sibling = node.find_sibling()
+                    parent.set_color("red")
+                    self.__right_rotate(parent)
+                    sibling = parent.get_left_child()
                 if (sibling.get_left_child() == None or sibling.get_left_child().get_color() == "black") and (sibling.get_right_child() == None or sibling.get_right_child().get_color() == "black"):
                     sibling.set_color("red")
-                    node = node.get_parent()
-                elif sibling.get_left_child() == None or sibling.get_left_child().get_color() == "black":
-                    sibling.get_right_child().set_color("black")
-                    sibling.set_color("red")
-                    self.__left_rotate(sibling)
-                    sibling = node.find_sibling()
-                sibling.set_color(node.get_parent().get_color())
-                node.get_parent().set_color("black")
-                if sibling.get_left_child() != None:
-                    sibling.get_left_child().set_color("black")
-                self.__right_rotate(node.get_parent())
-                node = self.__root
+                    node = parent
+                    parent = parent.get_parent()
+                    parent = parent.get_parent()
+                    if parent != None and parent.get_right_child() == node:
+                        left = False
+                else:
+                    if sibling.get_left_child() == None or sibling.get_left_child().get_color() == "black":
+                        sibling.get_right_child().set_color("black")
+                        sibling.set_color("red")
+                        self.__left_rotate(sibling)
+                        sibling = parent.get_left_child()
+                    sibling.set_color(parent.get_color())
+                    parent.set_color("black")
+                    if sibling.get_left_child() != None:
+                        sibling.get_left_child().set_color("black")
+                    self.__right_rotate(parent)
+                    node = self.__root
         node.set_color("black")
         
     def get_root(self):
@@ -303,6 +312,7 @@ class RBTree:
         """Removes the node that contains item as its key.
         If the given item does not exist in the BST as a node key, the function returns None.
         """
+        # Search for the node to remove
         left = True
         prev = None
         curr = self.__root
@@ -323,26 +333,47 @@ class RBTree:
             logger.debug("Item is not found")
             return None
         
-        print(f"\nFound node - key: {curr.get_key()}, parent: {curr.get_parent().get_key()}, left child: {curr.get_left_child() != None}, right child: {curr.get_right_child() != None}")
-        remove_node = curr
+        # Process removal
+        fix_node = curr
+        orig_color = curr.get_color()
         if curr.get_left_child() == None:
+            fix_node = curr.get_right_child()
             self.__transplant(curr, curr.get_right_child())
+            if fix_node != None:
+                prev = fix_node.get_parent()
         elif curr.get_right_child() == None:
+            fix_node = curr.get_left_child()
             self.__transplant(curr, curr.get_left_child())
+            if fix_node != None:
+                prev = fix_node.get_parent()
         else:
             successor = curr.get_right_child().min_node()
-            key = successor.get_key()
-            successor.set_key(curr.get_key())
-            curr.set_key(key)
-            remove_node = successor
-            self.__transplant(successor, successor.get_right_child())
+            x = successor.get_right_child()
+            fix_node = x
+            prev = successor
+            if successor.get_parent() == curr:
+                if x != None:
+                    x.set_parent(successor)
+            else:
+                self.__transplant(successor, x)
+                successor.set_right_child(curr.get_right_child())
+                if successor.get_right_child() != None:
+                    successor.get_right_child().set_parent(successor)
+            self.__transplant(curr, successor)
+            successor.set_left_child(curr.get_left_child())
+            successor.get_left_child().set_parent(successor)
+            successor.set_color(curr.get_color())
+            if fix_node != None:
+                prev = fix_node.get_parent()
+            orig_color = successor.get_color()
 
         # Fix the tree
-        self.__remove_fixup(curr, prev, left)
-        remove_node.set_parent(None)
-        remove_node.set_left_child(None)
-        remove_node.set_right_child(None)
+        if orig_color == "black":
+            self.__remove_fixup(fix_node, prev, left)
+        curr.set_parent(None)
+        curr.set_left_child(None)
+        curr.set_right_child(None)
         logger.debug("Target node is removed")
-        return remove_node
+        return curr
 
         
