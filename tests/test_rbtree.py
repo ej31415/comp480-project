@@ -11,6 +11,16 @@ class TestRBTree(unittest.TestCase):
     def setUp(self):
         self.rbtree = RBTree()
 
+    def test_equality(self):
+        pointer = self.rbtree
+        self.assertEqual(self.rbtree, pointer)
+        self.assertEqual(hash(self.rbtree), hash(pointer))
+
+        root = self.rbtree.get_root()
+        copy = root
+        self.assertEqual(root, copy)
+        self.assertEqual(hash(root), hash(copy))
+
     def test_empty_bst(self):
         self.assertEqual(0, self.rbtree.get_size())
         self.assertCountEqual([], self.rbtree.get_nodes_as_list())

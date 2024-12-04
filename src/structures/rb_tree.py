@@ -31,6 +31,17 @@ class RBTree:
             self.__left = left
             self.__right = right
             self.__parent = parent
+
+        def __eq__(self, other):
+            '''Override equality check to implement hashing.'''
+            print(type(other))
+            if type(other) != type(self):
+                return False
+            return self.get_key() == other.get_key()
+        
+        def __hash__(self):
+            '''Override hashing.'''
+            return hash(self.get_key())
         
         def get_key(self):
             '''Returns the key of this node.'''
@@ -105,12 +116,16 @@ class RBTree:
         self.__null = self.Node(key=None, color="black")
         self.__root = self.__null
         logger.info("Initialized a red-black tree...")
+
+    def __eq__(self, other):
+        '''Override equality check for hashing.'''
+        if not type(other) is RBTree:
+            return False
+        return self.get_root() == other.get_root()
     
-    def __min_node(self, node):
-        '''Finds and returns the minimum keyed node in the tree rooted at this node.'''
-        while node.get_left_child() != self.__null:
-            node = node.get_left_child()
-        return node 
+    def __hash__(self):
+        '''Override hashing.'''
+        return hash(self.get_root())
 
     def __transplant(self, u, v):
         """Transplant replaces the subtree rooted at node `u` with the subtree rooted at node `v`.
@@ -255,6 +270,10 @@ class RBTree:
         '''Returns the root node of the RBTree.'''
         return self.__root
     
+    def get_null(self):
+        '''Returns the sentinel node of the RBTree.'''
+        return self.__null
+    
     def get_size(self):
         '''Returns the number of the nodes in the RBTree.'''
         if self.__root == self.__null:
@@ -266,6 +285,12 @@ class RBTree:
         curr = self.__root
         node_keys = self.__traverse_helper(curr)
         return node_keys
+    
+    def min_node(self, node):
+        '''Finds and returns the minimum keyed node in the tree rooted at this node.'''
+        while node.get_left_child() != self.__null:
+            node = node.get_left_child()
+        return node 
 
     def insert(self, item)->bool:
         """Inserts a given item into the RBTree as a node.

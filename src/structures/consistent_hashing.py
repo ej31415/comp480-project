@@ -1,6 +1,9 @@
+import pandas as pd
+
 from sklearn.utils import murmurhash3_32
 
 from structures.bst import BST
+from structures.rb_tree import RBTree
 
 class ConsistentHashing:
     """
@@ -12,52 +15,23 @@ class ConsistentHashing:
     class ServerMock():
         """
         ServerMock mimics the behavior of a server.
-        The underlying fields include a tree for data storage, an inbox, and an outbox.
-        The inbox is for receiving any requests from a down server.
-        The outbox redirects requests to the next server when this server fails.
+        Id is the hash value assigned to this server by consistent hashing.
         """
 
-        def __init__(self, data=None, inbox=None, outbox=None):
-            '''Initialized to be online, with an empty inbox and outbox.'''
+        def __init__(self, id, data=None):
+            '''Initialized to be online, with an assigned hash value.'''
+            self.__id = id
             self.__data = data
-            self.__inbox = inbox
-            self.__outbox = outbox
             self.__online = True
+
+        def get_id(self):
+            return self.__id
         
         def get_data(self):
             return self.__data
         
-        def set_inbox(self, inbox):
-            self.__inbox = inbox
-
-        def set_outbox(self, outbox):
-            self.__outbox = outbox
-        
         def check_online(self):
             return self.__online
-        
-        def insert(self, item)->bool:
-            return self.__data.insert(item)
-        
-        def remove(self, item):
-            return self.__data.remove(item)
-        
-        def search(self, item):
-            if not self.__online:
-                return self.__outbox.search(item)
-            
-            start = self
-            server = self
-            while server != None:
-                data = server.get_data()
-                result = data.get(item)
-                if result == None:
-                    server = server.__inbox
-                    if server == start:
-                        return None
-                else:
-                    return result
-            return None
 
         def simulate_offline(self):
             self.__online = False
@@ -66,19 +40,67 @@ class ConsistentHashing:
             self.__online = True
         
 
-    def __init__(self, num_servers=10):
-        '''Initializes a list of mock servers with a hash function.'''
-        self.__server_ring = []
-        for i in range(num_servers):
-            self.__server_ring.append(self.ServerMock(data=BST())) # implement with BSTs
-        for i in range(num_servers):
-            self.__server_ring[i].set_inbox(self.__server_ring[(i - 1) % num_servers])
-            self.__server_ring[i].set_outbox(self.__server_ring[(i + 1) % num_servers])
+    def __init__(self, ring_size=1000000, num_servers=10, tree=""):
+        '''Initializes a list of mock servers with a hash function.
 
-        def generate_hash(seed=0):
-            return lambda item: murmurhash3_32(item, seed=seed) % num_servers
-        self.__hash_function = generate_hash()
+        Mock servers are placed around the ring evenly.
+        '''
+
+        def generate_hash(seed = 0):
+            def func(item):
+                return murmurhash3_32(item, seed=seed) % ring_size
+            return func
     
+        self.__hash_function = generate_hash()
+        self.__ring = pd.Series([None] * ring_size)
+        for i in range(num_servers):
+            server = self.ServerMock(i * ring_size / num_servers)
+            print(type(server))
+            self.__ring[self.__hash_function(server)] = server
+
+        match tree:
+            case "":
+                self.__server_storage = None
+            case "bst":
+                self.__server_storage = BST()
+            case "rbt":
+                self.__server_storage = RBTree()
+            case _:
+                raise Exception(f"Tree type is invalid.")
+    
+    def __find_server(self, hash):
+        if self.__server_storage != None:   # using a BST or variation to store servers
+            curr = self.__server_storage.get_root()
+            prev = None
+            while curr != self.__server_storage.get_null():
+                prev = curr
+                if hash < curr.get_key():
+                    curr = curr.get_left_child()
+                elif hash > curr.get_key():
+                    curr = curr.get_right_child()
+                else:
+                    raise Exception(f"Overlapping ring space.")
+                
+            if prev == None:
+                raise Exception(f"Server storage is empty.")
+            
+            while prev != None and curr == prev.get_right_child():
+                curr = prev
+                prev = curr.get_parent()
+            
+            if prev == None:
+                if curr.get_key() > hash:   # Case 1: root is successor
+                    return curr
+                else:                       # Case 2: wrap around
+                    return self.min_node(curr)
+            else:                           # Case 3: curr is left child of prev
+                return prev
+        else:                               # linear probing with list
+            for slot in self.__ring:
+                if type(slot) is self.ServerMock:
+                    return slot
+            raise Exception("Overlapping ring space.")
+
     def insert(self, item)->bool:
         server = self.__hash_function(item)
         success = self.__server_ring[server].insert(item)
