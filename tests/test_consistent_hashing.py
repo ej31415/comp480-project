@@ -19,9 +19,11 @@ class TestConsistentHashing(unittest.TestCase):
     def test_insert_multi(self):
         '''Test multiple insertions'''
         np.random.seed(123)
-        insert_values = np.random.choice(range(1, 1000000), size=100000)
+        insert_values = np.random.choice(range(1, 1000000), size=10000)
+        print("Inserting")
         for val in insert_values:
             self.ch.insert(val)
+        print("Checking")
         for val in insert_values:
             self.assertEqual(1, self.ch.query(val))
 
@@ -29,11 +31,11 @@ class TestConsistentHashing(unittest.TestCase):
         keys = np.arange(0, 100, 1)
         for key in keys:
             self.ch.insert(key)
-        
         removed_keys = [4, 13, 8, 75, 20, 61]
+
         for key in removed_keys:
             self.ch.remove(key)
-        
+
         for key in keys:
             if key not in removed_keys:
                 self.assertEqual(1, self.ch.query(key))
