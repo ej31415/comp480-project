@@ -117,20 +117,20 @@ class CuckooFilter:
         )
 
 
-# # Example usage
-# if __name__ == "__main__":
-#     cf = CuckooFilter(bucket_size=4, num_buckets=100, fingerprint_size=8, max_evictions=500)
+# Example usage
+if __name__ == "__main__":
+    cf = CuckooFilter(bucket_size=4, num_buckets=100, fingerprint_size=8, max_evictions=500)
     
-#     # Insert items
-#     print(cf.insert("apple"))  # Should return True
-#     print(cf.insert("banana"))  # Should return True
-#     print(cf.insert("cherry"))  # Should return True
+    # Insert items
+    print(cf.insert("apple"))  # Should return True
+    print(cf.insert("banana"))  # Should return True
+    print(cf.insert("cherry"))  # Should return True
     
-#     # Look up items
-#     print(cf.query("apple"))   # Should return True
-#     print(cf.query("banana"))  # Should return True
-#     print(cf.query("grape"))   # Should return False (if not inserted)
+    # Look up items
+    print(cf.query("apple"))   # Should return 1
+    print(cf.query("banana"))  # Should return 1
+    print(cf.query("grape"))   # Should return 0 (if not inserted)
     
-#     # Delete items
-#     print(cf.remove("banana"))  # Should return True
-#     print(cf.query("banana"))  # Should return False after deletion
+    # Delete items
+    print(cf.remove("banana"))  # Should return True
+    print(cf.query("banana"))  # Should return 0 after deletion
