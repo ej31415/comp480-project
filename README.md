@@ -5,7 +5,7 @@ Implement and benchmark probabilistic querying with the following implementation
 
 ### Bloom Filters
 - Naive bloom filter: bit array of size n, with k hash functions; every hashed slot flips the value from 0 to 1
-- Counting bloom filter: *TODO: add description*
+- Counting bloom filter: counter array of size n, with k hash functions: every hashed slots increase or decrease by counts until 0
 - Trie-based bloom filter: *TODO: add description*
 
 ### Cuckoo Filter

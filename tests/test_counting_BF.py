@@ -3,8 +3,8 @@ import unittest
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "../../src")
-from structures.counting_bloom_filter import CountingBloomFilter
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/structures")))
+from counting_bloom_filter import CountingBloomFilter
 
 class TestCountingBloomFilter(unittest.TestCase):
 
