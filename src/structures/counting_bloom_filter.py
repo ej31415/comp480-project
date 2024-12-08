@@ -89,6 +89,15 @@ class CountingBloomFilter:
             sys.getsizeof(self.__key_num) +
             sys.getsizeof(self.__false_positive_rate)
         )
+    
+    def min_count(self, item) -> int:
+        """Gets the minimum value stored corresponding to an item."""
+        logger.debug("Getting min count")
+        cnts = np.array([])
+        for hash_function in self.__hash_functions:
+            index = hash_function(item)
+            cnts = np.append(cnts, self.__counter_array[index])
+        return min(cnts)
 
 # if __name__ == "__main__":
 #     cbf = CountingBloomFilter(false_positive_rate=0.01, key_num=1e6)

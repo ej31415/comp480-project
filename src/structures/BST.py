@@ -26,6 +26,16 @@ class BST:
             self.__left = left
             self.__right = right
             self.__parent = parent
+
+        def __eq__(self, other):
+            '''Override equality check to implement hashing.'''
+            if type(other) != type(self):
+                return False
+            return self.get_key() == other.get_key()
+        
+        def __hash__(self):
+            '''Override hashing.'''
+            return hash(self.get_key())
         
         def get_key(self):
             '''Returns the key of this node.'''
@@ -54,13 +64,6 @@ class BST:
         def set_parent(self, node):
             '''Sets this node's parent.'''
             self.__parent = node
-    
-        def min_node(self):
-            '''Finds and returns the minimum keyed node in the tree rooted at this node.'''
-            curr = self
-            while curr.get_left_child() != None:
-                curr = curr.get_left_child()
-            return curr
         
         def get_subtree_size(self)->int:
             '''Returns the number of nodes in the subtree rooted at this node.'''
@@ -75,6 +78,17 @@ class BST:
         '''Initializes the tree by setting the root node to None.'''
         self.__root = root
         logger.info("Initialized a binary search tree...")
+
+    def __eq__(self, other):
+        '''Override equality check for hashing.'''
+        if not type(other) is BST:
+            print("Wrong type!!!")
+            return False
+        return self.get_root() == other.get_root()
+    
+    def __hash__(self):
+        '''Override hashing.'''
+        return hash(self.get_root())
 
     def __transplant(self, u, v):
         """Transplant replaces the subtree rooted at node `u` with the subtree rooted at node `v`.
@@ -115,6 +129,10 @@ class BST:
         '''Returns the root node of the BST.'''
         return self.__root
     
+    def get_null(self):
+        '''Returns the null pointer of the BST.'''
+        return None
+    
     def get_size(self):
         '''Returns the number of the nodes in the BST.'''
         if self.__root == None:
@@ -126,6 +144,12 @@ class BST:
         curr = self.__root
         node_keys = self.__traverse_helper(curr)
         return node_keys
+    
+    def min_node(self, node):
+        '''Finds and returns the minimum keyed node in the tree rooted at this node.'''
+        while node.get_left_child() != None:
+            node = node.get_left_child()
+        return node
     
     def insert(self, item)->bool:
         """Inserts a given item into the BST as a node.

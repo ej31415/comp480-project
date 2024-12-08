@@ -21,7 +21,7 @@ class CuckooFilter:
         self.num_buckets = num_buckets
         self.fingerprint_size = fingerprint_size // 8  # Convert bits to bytes
         self.max_evictions = max_evictions
-        self.buckets = [[] for _ in range(num_buckets)]
+        self.buckets = [[] for _ in range(int(num_buckets))]
         self.count = 0
 
     def _hash(self, item, seed=0):
@@ -33,15 +33,15 @@ class CuckooFilter:
         fp = self._hash(item)& ((1 << (self.fingerprint_size * 8)) - 1)
         return fp.to_bytes(self.fingerprint_size, 'little')[:self.fingerprint_size]
 
-    def _bucket_index(self, item, fp=None):
+    def _bucket_index(self, item, fp=None) -> int:
         """Computes the primary bucket index for an item or fingerprint."""
         if fp is None:
             fp = self._fingerprint(item)
-        return self._hash(fp.hex()) % self.num_buckets
+        return int(self._hash(fp.hex()) % self.num_buckets)
 
-    def _alternate_index(self, index, fp):
+    def _alternate_index(self, index, fp) -> int:
         """Calculates the alternate index using the fingerprint and initial bucket index."""
-        return (index ^ self._hash(fp.hex())) % self.num_buckets
+        return int((index ^ self._hash(fp.hex())) % self.num_buckets)
 
     def insert(self, item):
         """Inserts an item into the filter."""
@@ -87,7 +87,7 @@ class CuckooFilter:
         index2 = self._alternate_index(index1, fp)
 
         # Check both buckets for the fingerprint
-        return fp in self.buckets[index1] or fp in self.buckets[index2]
+        return int(fp in self.buckets[index1] or fp in self.buckets[index2])
 
     def remove(self, item):
         """Deletes an item from the filter, if it exists."""
@@ -117,20 +117,20 @@ class CuckooFilter:
         )
 
 
-# # Example usage
-# if __name__ == "__main__":
-#     cf = CuckooFilter(bucket_size=4, num_buckets=100, fingerprint_size=8, max_evictions=500)
+# Example usage
+if __name__ == "__main__":
+    cf = CuckooFilter(bucket_size=4, num_buckets=100, fingerprint_size=8, max_evictions=500)
     
-#     # Insert items
-#     print(cf.insert("apple"))  # Should return True
-#     print(cf.insert("banana"))  # Should return True
-#     print(cf.insert("cherry"))  # Should return True
+    # Insert items
+    print(cf.insert("apple"))  # Should return True
+    print(cf.insert("banana"))  # Should return True
+    print(cf.insert("cherry"))  # Should return True
     
-#     # Look up items
-#     print(cf.query("apple"))   # Should return True
-#     print(cf.query("banana"))  # Should return True
-#     print(cf.query("grape"))   # Should return False (if not inserted)
+    # Look up items
+    print(cf.query("apple"))   # Should return 1
+    print(cf.query("banana"))  # Should return 1
+    print(cf.query("grape"))   # Should return 0 (if not inserted)
     
-#     # Delete items
-#     print(cf.remove("banana"))  # Should return True
-#     print(cf.query("banana"))  # Should return False after deletion
+    # Delete items
+    print(cf.remove("banana"))  # Should return True
+    print(cf.query("banana"))  # Should return 0 after deletion

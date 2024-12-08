@@ -10,6 +10,16 @@ class TestBST(unittest.TestCase):
 
     def setUp(self):
         self.bst = BST()
+
+    def test_equality(self):
+        pointer = self.bst
+        self.assertEqual(self.bst, pointer)
+        self.assertEqual(hash(self.bst), hash(pointer))
+
+        root = self.bst.get_root()
+        copy = root
+        self.assertEqual(root, copy)
+        self.assertEqual(hash(root), hash(copy))
     
     def test_empty_bst(self):
         self.assertEqual(0, self.bst.get_size())

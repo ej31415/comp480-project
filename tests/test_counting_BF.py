@@ -38,5 +38,7 @@ class TestCountingBloomFilter(unittest.TestCase):
         for val in insert_values:
             self.counting_BF.insert(val)
         for val in insert_values:
+            orig = self.counting_BF.min_count(val)
             self.counting_BF.remove(val)
-            self.assertEqual(0, self.counting_BF.query(val))
+            new = self.counting_BF.min_count(val)
+            self.assertEqual(1, orig - new)

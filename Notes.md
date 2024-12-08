@@ -44,3 +44,6 @@
 - runtests.bat (Windows) and runtests.sh(Linux/Unix/macOS) will run all the tests and show coverage details
     - not too sure if runtests.sh will work with mac to be honest; never worked with macOS
 - test a single unittest: ```python -m unittest test_package.test_module.TestClass.test_method -v```
+
+## Report
+- mention that bloom filter false positive can be annoying to users if they get a message that their item to insert fails but their query for item shows that item has not yet been added (for example, try accessing corresponding item element but fails because it is only a bloom filter false positive)

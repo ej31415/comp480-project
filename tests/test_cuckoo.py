@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "../../src")
 from structures.cuckoo_filter import CuckooFilter
 
-class TestCountingBloomFilter(unittest.TestCase):
+class TestCuckoo(unittest.TestCase):
 
     def setUp(self):
         self.filter = CuckooFilter()

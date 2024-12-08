@@ -13,7 +13,7 @@ class TestBloomFilterSimple(unittest.TestCase):
 
     def test_insert_one(self):
         '''Test inserting a number'''
-        self.bloom_filter.insert(1)
+        self.assertTrue(self.bloom_filter.insert(1))
         self.assertEqual(1, self.bloom_filter.query(1))
     
     def test_insert_multi(self):

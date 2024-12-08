@@ -70,12 +70,16 @@ class BloomFilterSimple:
         """Inserts a given item to the bloom filter. Performed by flipping all the hasheds lots in the underlying bit array to 1.
 
         Returns a boolean representing successful insertion.
+        An insertion is unsuccessful if the bloom filter thinks that this item has alread been inserted.
         """
+        available = False
         for hash_function in self.__hash_functions:
             hashed_key = hash_function(item)
+            if self.__bit_array[hashed_key] == 0: # if any hashed bit is 0, we know this item has not yet been inserted
+                available = True
             self.__bit_array[hashed_key] = 1
         logger.debug("Inserted item")
-        return True # honestly not sure when to return False
+        return available
     
     def query(self, item)->int:
         """Checks the bloom filter for a given item's existence.
