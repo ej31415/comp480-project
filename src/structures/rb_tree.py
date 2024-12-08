@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import sys
 
 # Set up logging
 logger = logging.getLogger()
@@ -34,7 +35,6 @@ class RBTree:
 
         def __eq__(self, other):
             '''Override equality check to implement hashing.'''
-            print(type(other))
             if type(other) != type(self):
                 return False
             return self.get_key() == other.get_key()
@@ -109,7 +109,10 @@ class RBTree:
             '''Finds and returns the unclode node, if one exists.'''
             if self.get_parent() == None:
                 return None
-            return self.get_parent().find_sibling()       
+            return self.get_parent().find_sibling()     
+
+        def size(self)->int:
+            return sys.getsizeof(self) + sys.getsizeof(self.__key) + sys.getsizeof(self.__left) + sys.getsizeof(self.__right) + sys.getsizeof(self.__parent) + sys.getsizeof(self.__color)  
         
     def __init__(self):
         '''Initializes the tree by setting the root to None.'''
@@ -372,7 +375,7 @@ class RBTree:
             fix_node = curr.get_left_child()
             curr.set_left_child(None)
         else:
-            x = self.__min_node(curr.get_right_child())
+            x = self.min_node(curr.get_right_child())
             original_color = x.get_color()
             fix_node = x.get_right_child()
             if x.get_parent() == curr:
@@ -389,3 +392,5 @@ class RBTree:
         if original_color == "black":
             self.__remove_fixup(fix_node)
         
+    def size(self)->int:
+        return sys.getsizeof(self) + sum([node.size() for node in self.get_nodes_as_list()])
