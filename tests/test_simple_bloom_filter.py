@@ -3,7 +3,8 @@ import unittest
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "../../src")
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"))
+sys.path.append(src_path)
 from structures.simple_bloom_filter import BloomFilterSimple
 
 class TestBloomFilterSimple(unittest.TestCase):
@@ -19,7 +20,7 @@ class TestBloomFilterSimple(unittest.TestCase):
     def test_insert_multi(self):
         '''Test multiple insertions'''
         np.random.seed(123)
-        insert_values = np.random.choice(range(1, 1000000), size=100000)
+        insert_values = [str(val).encode() for val in np.random.choice(range(1, 1000000), size=100000)]
         for val in insert_values:
             self.bloom_filter.insert(val)
         for val in insert_values:

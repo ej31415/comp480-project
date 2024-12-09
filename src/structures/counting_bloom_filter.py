@@ -27,7 +27,7 @@ class CountingBloomFilter:
         # Calculate the required number of counters to meet the desired false positive rate
         num_counters = math.ceil(self.__key_num * np.log(self.__false_positive_rate) / np.log(0.618))
         self.__counter_array = np.zeros(num_counters, dtype=int)  # Use integer counters instead of bitarray (64 bits per counter for 64 bit systems)
-        logger.debug("Generated an array of %d counters", len(self.__counter_array))
+        logger.info("Generated an array of %d counters", len(self.__counter_array))
 
     def __generate_hash_functions(self):
         '''Generates a set of hash functions for the counting bloom filter.'''
@@ -51,7 +51,7 @@ class CountingBloomFilter:
         num_counters = len(self.__counter_array)
         num_hashes = math.floor(num_counters / self.__key_num * np.log(2))
         self.__hash_functions = hash_function_generator(num_hashes, num_counters)
-        logger.debug("Generated %d hash functions", len(self.__hash_functions))
+        logger.info("Generated %d hash functions", len(self.__hash_functions))
 
     def insert(self, item) -> bool:
         """Inserts an item into the counting bloom filter by incrementing the relevant counters."""
