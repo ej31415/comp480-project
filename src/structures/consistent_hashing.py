@@ -1,6 +1,11 @@
+import logging
 import pandas as pd
 from bst import BST
 from rb_tree import RBTree
+
+# Set up logging
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 class ConsistentHashing:
     """
@@ -66,9 +71,12 @@ class ConsistentHashing:
     
         self.__hash_function = generate_hash()
         self.__ring = pd.Series([None] * ring_size)
+        self.__servers = {}
         for i in range(num_servers):
             server = self.ServerMock(i * ring_size / num_servers)
-            self.__ring[self.__hash_function(server)] = server
+            position = self.__hash_function(server)
+            self.__ring[position] = server
+            self.__servers[i] = position
 
         match tree:
             case "":
@@ -79,9 +87,8 @@ class ConsistentHashing:
                 self.__server_storage = RBTree()
             case _:
                 raise Exception(f"Tree type is invalid.")
-    
-    def get_ring(self):
-        return self.__ring
+        
+        logger.debug(f"Initialized consistent hashing with size {ring_size} and {num_servers} servers and storage with {tree if tree != '' else 'nothing'}")
 
     def __find_server(self, hash):
         if self.__server_storage != None:   # using a BST or variation to store servers
@@ -113,11 +120,38 @@ class ConsistentHashing:
         else:                               # linear probing with list
             cnt = 0
             while cnt < self.__ring.size:
-                if type(self.__ring[hash]) is self.ServerMock:
+                if type(self.__ring[hash]) is self.ServerMock and self.__ring[hash].check_online():
                     return hash
                 hash = (hash + 1) % self.__ring.size
                 cnt += 1
             raise Exception("Overlapping ring space.")
+        
+    def __find_next_server_index(self, position) -> int:
+        check_pos = (position + 1) % self.__ring.size
+        while check_pos != position:
+            if (type(self.__ring[check_pos]) == self.ServerMock and self.__ring[check_pos].check_online()):
+                return check_pos
+            check_pos = (check_pos + 1) % self.__ring.size
+        return -1
+    
+    def get_ring(self):
+        return self.__ring
+    
+    def get_server_sizes(self):
+        lengths = []
+        for k in self.__servers.keys():
+            lengths.append(len(self.__ring[self.__servers[k]].get_data()))
+        return lengths
+    
+    def find(self, item)->int:
+        hash = self.__hash_function(item)
+        cnt = 0
+        while cnt < self.__ring.size:
+            if self.__ring[hash] == item:
+                return hash
+            hash = (hash + 1) % self.__ring.size
+            cnt += 1
+        return -1
 
     def insert(self, item)->bool:
         hash = self.__hash_function(item)
@@ -152,6 +186,87 @@ class ConsistentHashing:
             hash = (hash + 1) % self.__ring.size
             cnt += 1
         return None
+    
+    def simulate_offline(self, id):
+        '''Downs the server with the given `id`.'''
+        position = self.__servers[id]
+        if position == None:
+            raise Exception("Given server position is out of range!")
+        
+        # Find the next server
+        server = self.__ring[position]
+        if not server.check_online():
+            logger.warning("The specified server is already down.")
+            return
+        server_next = None
+        
+        if self.__server_storage == None:
+            check_pos = self.__find_next_server_index(position)
+            if check_pos == -1:
+                raise Exception("Next server not found.")
+            server_next = self.__ring[check_pos]
+        else:
+            node = self.__server_storage.get(position)
+            succ = self.__server_storage.successor(node)
+            if succ == None:
+                succ = self.__server_storage.min_node(self.__server_storage.get_root())
+            if node == succ:
+                raise Exception("No available server!")
+            server_next = self.__ring[succ.get_key()]
+            self.__server_storage.remove(node)
+        
+        for item in server.get_data().copy():
+            server.remove(item)
+            server_next.insert(item)
+        
+        server.simulate_offline()
+
+        logger.info(f"Server {id} is offline={not server.check_online()}")
+    
+    def simulate_online(self, id):
+        '''Bring a server back online.'''
+        position = self.__servers[id]
+        if position == None:
+            raise Exception("Given server position is out of range!")
+        
+        server = self.__ring[position]
+        if not type(server) is self.ServerMock:
+            raise Exception("Server position has been replaced.")
+        if server.check_online():
+            logger.warning("The specified server is already online.")
+            return
+        server_next = None
+        server_next_idx = -1
+        
+        if self.__server_storage == None:
+            check_pos = self.__find_next_server_index(position)
+            if check_pos == -1:
+                raise Exception("Next server not found.")
+            server_next = self.__ring[check_pos]
+            server_next_idx = check_pos
+        else:
+            node = self.__server_storage.get(position)
+            succ = self.__server_storage.successor(node)
+            if succ == None:
+                succ = self.__server_storage.min_node(self.__server_storage.get_root())
+            if node == succ:
+                raise Exception("No available server!")
+            server_next = self.__ring[succ.get_key()]
+            self.__server_storage.remove(node)
+        
+        for item in server_next.get_data().copy():
+            idx = self.find(item)
+            if position < server_next_idx and not (idx > position and idx < server_next_idx):
+                server_next.remove(item)
+                server.insert(item)
+            elif position > server_next_idx and not (idx > position or idx < server_next_idx):
+                server_next.remove(item)
+                server.insert(item)
+        
+        server.simulate_online()
+
+        logger.info(f"Server {id} is online={server.check_online()}")
+
 
 
 def little_test():
@@ -163,19 +278,18 @@ def little_test():
 
     print("Make new Consistent Hashing")
     ch = ConsistentHashing(ring_size=ring_size, num_servers=servers)
-    print(f"Internal: {ch.get_ring()}")
     ch.insert(1)
-    print(f"Internal: {ch.get_ring()}")
     ch.insert(8)
-    print(f"Internal: {ch.get_ring()}")
     ch.insert(3)
-    print(f"Internal: {ch.get_ring()}")
     ch.insert(10)
     print(f"Internal: {ch.get_ring()}")
+    print(ch.get_server_sizes())
+    ch.simulate_offline(1)
+    print(ch.get_server_sizes())
     ch.remove(3)
-    print(f"Internal: {ch.get_ring()}")
     ch.remove(1)
-    print(f"Internal: {ch.get_ring()}")
+    print(ch.get_server_sizes())
+    ch.simulate_online(1)
+    print(ch.get_server_sizes())
 
 # little_test()
-

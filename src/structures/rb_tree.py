@@ -294,6 +294,20 @@ class RBTree:
         while node.get_left_child() != self.__null:
             node = node.get_left_child()
         return node 
+    
+    def successor(self, node):
+        """Finds and returns the successor of a node.
+        This function will only be called internally, so the node is guaranteed to exist.
+        """
+        if node.get_right_child() != None:
+            return node.get_right_child().min_node()
+        
+        curr = node
+        next = curr.get_parent()
+        while next != None and curr == next.get_right_child():
+            curr = next
+            next = next.get_parent()
+        return next
 
     def insert(self, item)->bool:
         """Inserts a given item into the RBTree as a node.

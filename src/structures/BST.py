@@ -107,21 +107,6 @@ class BST:
         
         if v != None:
             v.set_parent(u.get_parent())
-    
-    ## we might not need this
-    # def __successor(self, node):
-    #     """Finds and returns the successor of a node.
-    #     This function will only be called internally, so the node is guaranteed to exist.
-    #     """
-    #     if node.get_right_child() != None:
-    #         return node.get_right_child().min_node()
-        
-    #     curr = node
-    #     next = curr.get_parent()
-    #     while next != None and curr == next.get_right_child():
-    #         curr = next
-    #         next = next.get_parent()
-    #     return next
 
     def __traverse_helper(self, node):
         '''Gets the keys of all nodes into a list, using inorder traversal.'''
@@ -154,6 +139,20 @@ class BST:
         while node.get_left_child() != None:
             node = node.get_left_child()
         return node
+    
+    def successor(self, node):
+        """Finds and returns the successor of a node.
+        This function will only be called internally, so the node is guaranteed to exist.
+        """
+        if node.get_right_child() != None:
+            return node.get_right_child().min_node()
+        
+        curr = node
+        next = curr.get_parent()
+        while next != None and curr == next.get_right_child():
+            curr = next
+            next = next.get_parent()
+        return next
     
     def insert(self, item)->bool:
         """Inserts a given item into the BST as a node.
