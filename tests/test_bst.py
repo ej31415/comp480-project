@@ -3,8 +3,8 @@ import os
 import sys
 import unittest
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/structures")))
-from BST import BST
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+from structures.bst import BST
 
 class TestBST(unittest.TestCase):
 

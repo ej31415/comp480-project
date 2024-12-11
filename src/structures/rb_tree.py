@@ -2,6 +2,8 @@ import logging
 import numpy as np
 import sys
 
+from sklearn.utils import murmurhash3_32
+
 # Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -25,9 +27,10 @@ class RBTree:
         The color of a ndoe is either red or black.
         """
 
-        def __init__(self, key, color="red", left=None, right=None, parent=None):
+        def __init__(self, key, value=None, color="red", left=None, right=None, parent=None):
             '''Initialize the node to the specified key. The children and parent are set to None by default while the color is red.'''
             self.__key = key
+            self.__value = value
             self.__color = color
             self.__left = left
             self.__right = right
@@ -35,17 +38,21 @@ class RBTree:
 
         def __eq__(self, other):
             '''Override equality check to implement hashing.'''
-            if type(other) != type(self):
+            if not isinstance(other, RBTree.Node):
                 return False
             return self.get_key() == other.get_key()
         
         def __hash__(self):
             '''Override hashing.'''
-            return hash(self.get_key())
+            return murmurhash3_32(self.__key)
         
         def get_key(self):
             '''Returns the key of this node.'''
             return self.__key
+        
+        def get_value(self):
+            '''Returns the value of this node.'''
+            return self.__value
         
         def get_color(self):
             '''Returns the color of this node.'''
@@ -122,7 +129,7 @@ class RBTree:
 
     def __eq__(self, other):
         '''Override equality check for hashing.'''
-        if not type(other) is RBTree:
+        if not isinstance(other, RBTree):
             return False
         return self.get_root() == other.get_root()
     
@@ -309,7 +316,7 @@ class RBTree:
             next = next.get_parent()
         return next
 
-    def insert(self, item)->bool:
+    def insert(self, item, value=None)->bool:
         """Inserts a given item into the RBTree as a node.
         If the item is already in the RBTree, then the insertion fails.
         
@@ -329,7 +336,7 @@ class RBTree:
                 return False
         
         # Create and insert the new node
-        new_node = self.Node(item, left=self.__null, right=self.__null, parent=prev)
+        new_node = self.Node(item, value=value, left=self.__null, right=self.__null, parent=prev)
         if prev == None:
             self.__root = new_node
         elif item < prev.get_key():

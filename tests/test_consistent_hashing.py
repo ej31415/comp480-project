@@ -9,7 +9,7 @@ from structures.consistent_hashing import ConsistentHashing
 class TestConsistentHashing(unittest.TestCase):
 
     def setUp(self):
-        self.ch = ConsistentHashing()
+        self.ch = ConsistentHashing(num_servers=1000)
 
     def test_insert_one(self):
         '''Test inserting a number'''
@@ -19,7 +19,7 @@ class TestConsistentHashing(unittest.TestCase):
     def test_insert_multi(self):
         '''Test multiple insertions'''
         np.random.seed(123)
-        insert_values = np.random.choice(range(1, 1000000), size=10000)
+        insert_values = np.random.choice(range(1, 1000000), size=100000)
         print("Inserting")
         for val in insert_values:
             self.ch.insert(val)

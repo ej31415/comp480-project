@@ -1,7 +1,10 @@
 import logging
 import pandas as pd
-from bst import BST
-from rb_tree import RBTree
+import sys
+
+from sklearn.utils import murmurhash3_32
+from structures.bst import BST
+from structures.rb_tree import RBTree
 
 # Set up logging
 logger = logging.getLogger()
@@ -28,14 +31,14 @@ class ConsistentHashing:
 
         def __eq__(self, other):
             '''Override equality check to implement hashing.'''
-            if type(other) != type(self):
+            if not isinstance(other, ConsistentHashing.ServerMock):
                 return False
             return self.__id == other.__id and self.__online == other.__online
         
         def __hash__(self):
             '''Override hashing.'''
-            return hash(self.__id)
-
+            return murmurhash3_32(self.__id)
+        
         def get_id(self):
             return self.__id
         
@@ -47,6 +50,15 @@ class ConsistentHashing:
         
         def remove(self, item):
             self.__data.remove(item)
+        
+        def size(self):
+            def recursive_sizeof(item):
+                size = sys.getsizeof(item)
+                if isinstance(item, (list, tuple, set)):
+                    for i in item:
+                        size += recursive_sizeof(i)
+                return size
+            return sys.getsizeof(self.__id) + recursive_sizeof(self.__data) + sys.getsizeof(self.__online)
         
         def check_online(self):
             return self.__online
@@ -66,17 +78,12 @@ class ConsistentHashing:
 
         def generate_hash(seed = 0):
             def func(item):
-                return hash(item) % ring_size
+                return int(hash(item) % ring_size)
             return func
     
         self.__hash_function = generate_hash()
         self.__ring = pd.Series([None] * ring_size)
         self.__servers = {}
-        for i in range(num_servers):
-            server = self.ServerMock(i * ring_size / num_servers)
-            position = self.__hash_function(server)
-            self.__ring[position] = server
-            self.__servers[i] = position
 
         match tree:
             case "":
@@ -87,6 +94,14 @@ class ConsistentHashing:
                 self.__server_storage = RBTree()
             case _:
                 raise Exception(f"Tree type is invalid.")
+
+        for i in range(num_servers):
+            server = self.ServerMock(int(i * ring_size / num_servers))
+            position = self.__hash_function(server)
+            self.__ring[position] = server
+            self.__servers[i] = position
+            if self.__server_storage != None:
+                self.__server_storage.insert(position, value=server)
         
         logger.debug(f"Initialized consistent hashing with size {ring_size} and {num_servers} servers and storage with {tree if tree != '' else 'nothing'}")
 
@@ -114,7 +129,7 @@ class ConsistentHashing:
                 if curr.get_key() > hash:   # Case 1: root is successor
                     return curr.get_key()
                 else:                       # Case 2: wrap around
-                    return self.min_node(curr).get_key()
+                    return self.__server_storage.min_node(curr).get_key()
             else:                           # Case 3: curr is left child of prev
                 return prev.get_key()
         else:                               # linear probing with list
@@ -186,6 +201,24 @@ class ConsistentHashing:
             hash = (hash + 1) % self.__ring.size
             cnt += 1
         return None
+    
+    def size(self)->int:
+        def recursive_sizeof(item):
+            size = sys.getsizeof(item)
+            if isinstance(item, (list, tuple, set)):
+                for i in item:
+                    size += recursive_sizeof(i)
+            if isinstance(item, dict):
+                for k in item.keys():
+                    size += recursive_sizeof(k)
+                    size += recursive_sizeof(item[k])
+            if isinstance(item, self.ServerMock):
+                size += item.size()
+            if isinstance(item, pd.Series):
+                for _, i in item.items():
+                    size += recursive_sizeof(i)
+            return size
+        return sys.getsizeof(self) + sys.getsizeof(self.__hash_function) + recursive_sizeof(self.__ring) + recursive_sizeof(self.__servers) +  0 if self.__server_storage == None else self.__server_storage.size()
     
     def simulate_offline(self, id):
         '''Downs the server with the given `id`.'''

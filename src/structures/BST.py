@@ -2,6 +2,8 @@ import logging
 import numpy as np
 import sys
 
+from sklearn.utils import murmurhash3_32
+
 # Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -21,26 +23,31 @@ class BST:
         A node consists of a key and two children nodes. A parent pointer is kept to support functions.
         """
 
-        def __init__(self, key, left=None, right=None, parent=None):
+        def __init__(self, key, value=None, left=None, right=None, parent=None):
             '''Initialize the node to the specified key. The children and parent are set to None by default unless specified.'''
             self.__key = key
+            self.__value = value
             self.__left = left
             self.__right = right
             self.__parent = parent
 
         def __eq__(self, other):
             '''Override equality check to implement hashing.'''
-            if type(other) != type(self):
+            if not isinstance(other, BST.Node):
                 return False
             return self.get_key() == other.get_key()
         
         def __hash__(self):
             '''Override hashing.'''
-            return hash(self.get_key())
+            return murmurhash3_32(self.__key)
         
         def get_key(self):
             '''Returns the key of this node.'''
             return self.__key
+        
+        def get_value(self):
+            '''Returns the value of this node.'''
+            return self.__value
         
         def get_left_child(self):
             '''Returns the left child of this node.'''
@@ -85,8 +92,7 @@ class BST:
 
     def __eq__(self, other):
         '''Override equality check for hashing.'''
-        if not type(other) is BST:
-            print("Wrong type!!!")
+        if not isinstance(other, BST):
             return False
         return self.get_root() == other.get_root()
     
@@ -154,7 +160,7 @@ class BST:
             next = next.get_parent()
         return next
     
-    def insert(self, item)->bool:
+    def insert(self, item, value=None)->bool:
         """Inserts a given item into the BST as a node.
         If the item is already in the BST, then the insertion fails.
         
@@ -175,7 +181,7 @@ class BST:
                 return False
         
         # Insert under parent node
-        new_node = self.Node(item)
+        new_node = self.Node(item, value=value)
         if prev != None:
             new_node.set_parent(prev)
             prev_key = prev.get_key()

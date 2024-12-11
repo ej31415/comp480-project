@@ -1,4 +1,5 @@
 # Data storage system
+import sys
 
 class System:
 
@@ -29,3 +30,6 @@ class System:
         if removed_item == None: # TODO split for logging messages later
             return False
         return True
+    
+    def size(self):
+        return sys.getsizeof(self) + self.__users.size() + self.__data.size()
