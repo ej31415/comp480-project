@@ -51,14 +51,14 @@ class ConsistentHashing:
         def remove(self, item):
             self.__data.remove(item)
         
-        def size(self):
-            def recursive_sizeof(item):
-                size = sys.getsizeof(item)
-                if isinstance(item, (list, tuple, set)):
-                    for i in item:
-                        size += recursive_sizeof(i)
-                return size
-            return sys.getsizeof(self.__id) + recursive_sizeof(self.__data) + sys.getsizeof(self.__online)
+        # def size(self):
+        #     def recursive_sizeof(item):
+        #         size = sys.getsizeof(item)
+        #         if isinstance(item, (list, tuple, set)):
+        #             for i in item:
+        #                 size += recursive_sizeof(i)
+        #         return size
+        #     return sys.getsizeof(self.__id) + recursive_sizeof(self.__data) + sys.getsizeof(self.__online)
         
         def check_online(self):
             return self.__online
@@ -202,23 +202,23 @@ class ConsistentHashing:
             cnt += 1
         return None
     
-    def size(self)->int:
-        def recursive_sizeof(item):
-            size = sys.getsizeof(item)
-            if isinstance(item, (list, tuple, set)):
-                for i in item:
-                    size += recursive_sizeof(i)
-            if isinstance(item, dict):
-                for k in item.keys():
-                    size += recursive_sizeof(k)
-                    size += recursive_sizeof(item[k])
-            if isinstance(item, self.ServerMock):
-                size += item.size()
-            if isinstance(item, pd.Series):
-                for _, i in item.items():
-                    size += recursive_sizeof(i)
-            return size
-        return sys.getsizeof(self) + sys.getsizeof(self.__hash_function) + recursive_sizeof(self.__ring) + recursive_sizeof(self.__servers) +  0 if self.__server_storage == None else self.__server_storage.size()
+    # def size(self)->int:
+    #     def recursive_sizeof(item):
+    #         size = sys.getsizeof(item)
+    #         if isinstance(item, (list, tuple, set)):
+    #             for i in item:
+    #                 size += recursive_sizeof(i)
+    #         if isinstance(item, dict):
+    #             for k in item.keys():
+    #                 size += recursive_sizeof(k)
+    #                 size += recursive_sizeof(item[k])
+    #         if isinstance(item, self.ServerMock):
+    #             size += item.size()
+    #         if isinstance(item, pd.Series):
+    #             for _, i in item.items():
+    #                 size += recursive_sizeof(i)
+    #         return size
+    #     return sys.getsizeof(self) + sys.getsizeof(self.__hash_function) + recursive_sizeof(self.__ring) + recursive_sizeof(self.__servers) +  0 if self.__server_storage == None else self.__server_storage.size()
     
     def simulate_offline(self, id):
         '''Downs the server with the given `id`.'''

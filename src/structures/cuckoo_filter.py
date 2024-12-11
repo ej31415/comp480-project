@@ -123,15 +123,15 @@ class CuckooFilter:
             logger.error(f"Item {item} not found for removal")
         return removed
     
-    def size(self):
-        """Gets the memory size of the counting bloom filter."""
-        logger.debug("Getting CountingBloomFilter size")
-        return (
-            sys.getsizeof(self) + # Size of the object itself
-            sys.getsizeof(self.buckets) + # Size of the bucket list
-            self.num_buckets * sys.getsizeof([]) + # Per-bucket overhead
-            self.count * self.fingerprint_size # Size of all fingerprints
-        )
+    # def size(self):
+    #     """Gets the memory size of the counting bloom filter."""
+    #     logger.debug("Getting CountingBloomFilter size")
+    #     return (
+    #         sys.getsizeof(self) + # Size of the object itself
+    #         sys.getsizeof(self.buckets) + # Size of the bucket list
+    #         self.num_buckets * sys.getsizeof([]) + # Per-bucket overhead
+    #         self.count * self.fingerprint_size # Size of all fingerprints
+    #     )
 
 
 # Example usage

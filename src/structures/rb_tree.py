@@ -118,8 +118,8 @@ class RBTree:
                 return None
             return self.get_parent().find_sibling()     
 
-        def size(self)->int:
-            return sys.getsizeof(self) + sys.getsizeof(self.__key) + sys.getsizeof(self.__left) + sys.getsizeof(self.__right) + sys.getsizeof(self.__parent) + sys.getsizeof(self.__color)  
+        # def size(self)->int:
+        #     return sys.getsizeof(self) + sys.getsizeof(self.__key) + sys.getsizeof(self.__value) + sys.getsizeof(self.__left) + sys.getsizeof(self.__right) + sys.getsizeof(self.__parent) + sys.getsizeof(self.__color)  
         
     def __init__(self):
         '''Initializes the tree by setting the root to None.'''
@@ -413,5 +413,5 @@ class RBTree:
         if original_color == "black":
             self.__remove_fixup(fix_node)
         
-    def size(self)->int:
-        return sys.getsizeof(self) + sum([node.size() for node in self.get_nodes_as_list()])
+    # def size(self)->int:
+    #     return sys.getsizeof(self) + sum([node.size() for node in self.get_nodes_as_list()])

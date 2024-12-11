@@ -3,8 +3,9 @@ import glob
 import math
 import matplotlib.pyplot as plt
 import pandas as pd
-import sys
 import time
+
+from pympler import asizeof
 
 from structures.simple_bloom_filter import BloomFilterSimple
 from structures.counting_bloom_filter import CountingBloomFilter
@@ -28,67 +29,62 @@ main_dataframe = pd.read_csv("data/medium_articles.csv")
 articles = main_dataframe.iloc[:, 0].unique()
 print(f"There are {len(articles)} articles.")
 
-# # Set up baseline system
-# usernames = set([])
-# data = set([])
-# base = (usernames, data)
+# Set up baseline system
+usernames = set([])
+data = set([])
+base = (usernames, data)
 
-# # Do operations
-# def recursive_sizeof(item):
-# 	size = sys.getsizeof(item)
-# 	if isinstance(item, (list, tuple, set)):
-# 		for i in item:
-# 			size += recursive_sizeof(i)
-# 	return size
+# Do operations
 
-# start_times = []
-# end_times = []
+start_times = []
+end_times = []
 
-# start_mem = recursive_sizeof(base) / 1000
-# end_mems = [start_mem]
+start_mem = asizeof.asizeof(base) / 1000
+end_mems = [start_mem]
 
-# periods = 10
-# part_names = math.ceil(names.size / periods)
-# part_articles = math.ceil(articles.size / periods)
-# for period in range(periods):
-# 	print(f"Evaluating period {period + 1}...")
-# 	start_times.append(time.time())
-# 	i, j = period * part_names, period * part_articles
-# 	while i < (period + 1) * part_names and i < names.size:
-# 		base[0].add(names[i])
-# 		i += 1
-# 	while j < (period + 1) * part_articles and j < articles.size:
-# 		base[1].add(articles[j])
-# 		j += 1
-# 	end_times.append(time.time())
-# 	end_mems.append(recursive_sizeof(base) / 1000)
-# 	print(f"Inserted {len(base[0])} usernames and {len(base[1])} items.")
+periods = 10
+part_names = math.ceil(names.size / periods)
+part_articles = math.ceil(articles.size / periods)
+for period in range(periods):
+	print(f"Evaluating period {period + 1}...")
+	start_times.append(time.time())
+	i, j = period * part_names, period * part_articles
+	while i < (period + 1) * part_names and i < names.size:
+		base[0].add(names[i])
+		i += 1
+	while j < (period + 1) * part_articles and j < articles.size:
+		base[1].add(articles[j])
+		j += 1
+	end_times.append(time.time())
+	end_mems.append(asizeof.asizeof(base) / 1000)
+	print(f"Inserted {len(base[0])} usernames and {len(base[1])} items.")
 
 
-# # Find total time to do said operations
-# base_time = end_times[len(end_times) - 1] - start_times[0]
-# print(f"Base took a total of {base_time} time.")
+# Find total time to do said operations
+base_time = end_times[len(end_times) - 1] - start_times[0]
+print(f"Base took a total of {base_time} time.")
 
-# # Find total memory usage
-# base_mem = end_mems[len(end_mems) - 1] - start_mem
-# print(f"Base took a total of {base_mem} memory.")
+# Find total memory usage
+base_mem = end_mems[len(end_mems) - 1] - start_mem
+print(f"Base took a total of {base_mem} memory.")
 
-# # Plot and save
-# total_time = []
-# for p in range(periods):
-# 	total_time.append((total_time[p - 1] if p > 0 else 0) + end_times[p] - start_times[p])
-# plt.plot(range(1, 11), total_time, color="blue")
-# plt.title("Python Set Insertion Times")
-# plt.xlabel("Sections")
-# plt.ylabel("Time from Start (seconds)")
-# plt.savefig("plots/base-time.png")
-# plt.clf()
+# Plot and save
+total_time = []
+for p in range(periods):
+	total_time.append((total_time[p - 1] if p > 0 else 0) + end_times[p] - start_times[p])
+plt.plot(range(1, 11), total_time, color="blue")
+plt.title("Python Set Insertion Times")
+plt.xlabel("Sections")
+plt.ylabel("Time from Start (seconds)")
+plt.savefig("plots/base-time.png")
+plt.clf()
 
-# plt.plot(range(0, 11), end_mems, color="orange")
-# plt.title("Python Set Insertion Memory")
-# plt.xlabel("Sections")
-# plt.ylabel("Memory Usage (KB)")
-# plt.savefig("plots/base-mem.png")
+plt.plot(range(0, 11), end_mems, color="orange")
+plt.title("Python Set Insertion Memory")
+plt.xlabel("Sections")
+plt.ylabel("Memory Usage (KB)")
+plt.savefig("plots/base-mem.png")
+plt.clf()
 
 
 # Benchmarking
@@ -131,7 +127,7 @@ for name, system in systems.items():
 	start_times = []
 	end_times = []
 
-	start_mem = system.size() / 1000
+	start_mem = asizeof.asizeof(system) / 1000
 	end_mems = [start_mem]
 
 	periods = 10
@@ -148,7 +144,7 @@ for name, system in systems.items():
 			system.add_item(articles[j])
 			j += 1
 		end_times.append(time.time())
-		end_mems.append(system.size() / 1000)
+		end_mems.append(asizeof.asizeof(system) / 1000)
 
 
 	# Find total time to do said operations
@@ -163,7 +159,6 @@ for name, system in systems.items():
 	total_time = []
 	for p in range(periods):
 		total_time.append((total_time[p - 1] if p > 0 else 0) + end_times[p] - start_times[p])
-	plt.clf()
 	plt.plot(range(1, 11), total_time, color="blue")
 	plt.title(f"{lookup_table[name[:name.index('(')]]} {name[name.index('('):name.index(')') + 1]} x {lookup_table[name.split('-')[1].split('_')[0]]} Insertion Times")
 	plt.xlabel("Sections")
@@ -176,7 +171,4 @@ for name, system in systems.items():
 	plt.xlabel("Sections")
 	plt.ylabel("Memory Usage (KB)")
 	plt.savefig(f"plots/{name}-mem.png")
-
-# Find total time to do said operations
-
-# Find total memory usage
+	plt.clf()

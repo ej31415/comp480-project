@@ -94,11 +94,11 @@ class BloomFilterSimple:
         logger.debug("Item is found")
         return 1
     
-    def size(self)->int:
-        """Gets the size of the bloom filter. 
-        Memory usage involves: self, bit array, hash functions, number of keys, false positive rate.
+    # def size(self)->int:
+    #     """Gets the size of the bloom filter. 
+    #     Memory usage involves: self, bit array, hash functions, number of keys, false positive rate.
         
-        Returns the size value.
-        """
-        logger.debug("Getting BloomFilterSimple size")
-        return sys.getsizeof(self) + sys.getsizeof(self.__bit_array) + sys.getsizeof(self.__hash_functions) + self.__key_num + self.__false_positive_rate
+    #     Returns the size value.
+    #     """
+    #     logger.debug("Getting BloomFilterSimple size")
+    #     return sys.getsizeof(self) + sys.getsizeof(self.__bit_array) + sys.getsizeof(self.__hash_functions) + self.__key_num + self.__false_positive_rate

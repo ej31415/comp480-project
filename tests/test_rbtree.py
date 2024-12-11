@@ -75,12 +75,3 @@ class TestRBTree(unittest.TestCase):
         self.assertEqual(4, self.rbtree.get_size())
         self.assertEqual(8, self.rbtree.get_root().get_key())
         self.assertCountEqual(["black", "black", "black", "red"], [n.get_color() for n in self.rbtree.get_nodes_as_list()])
-
-    def test_size(self):
-        orig = self.rbtree.size()
-        keys = [5, 3, 1, 2, 4, 7, 6, 8, 9]
-        for key in keys:
-            self.rbtree.insert(key)
-        new = self.rbtree.size()
-        self.assertEqual(self.rbtree.get_root().get_left_child().size(), self.rbtree.get_root().get_right_child().size())
-        self.assertTrue(abs((new - orig) / 9 - self.rbtree.get_root().size()) <= 56)    # one object reference size

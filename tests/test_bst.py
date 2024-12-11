@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "../../src")
 from structures.bst import BST
 
 class TestBST(unittest.TestCase):
@@ -118,12 +118,3 @@ class TestBST(unittest.TestCase):
             keys.remove(value)
             self.bst.remove(value)
             self.assertCountEqual(keys, [n.get_key() for n in self.bst.get_nodes_as_list()])
-        
-    def test_size(self):
-        orig = self.bst.size()
-        keys = [5, 3, 1, 2, 4, 7, 6, 8, 9]
-        for key in keys:
-            self.bst.insert(key)
-        new = self.bst.size()
-        self.assertEqual(self.bst.get_root().get_left_child().size(), self.bst.get_root().get_right_child().size())
-        self.assertTrue(abs((new - orig) / 9 - self.bst.get_root().size()) <= 10)

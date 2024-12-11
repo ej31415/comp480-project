@@ -31,5 +31,5 @@ class System:
             return False
         return True
     
-    def size(self):
-        return sys.getsizeof(self) + self.__users.size() + self.__data.size()
+    # def size(self):
+    #     return sys.getsizeof(self) + self.__users.size() + self.__data.size()

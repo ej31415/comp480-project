@@ -79,16 +79,16 @@ class CountingBloomFilter:
                 return 0  # Item is not in the set
         return 1  # Item is possibly in the set
 
-    def size(self) -> int:
-        """Gets the memory size of the counting bloom filter."""
-        logger.debug("Getting CountingBloomFilter size")
-        return (
-            sys.getsizeof(self) +
-            sys.getsizeof(self.__counter_array) +
-            sys.getsizeof(self.__hash_functions) +
-            sys.getsizeof(self.__key_num) +
-            sys.getsizeof(self.__false_positive_rate)
-        )
+    # def size(self) -> int:
+    #     """Gets the memory size of the counting bloom filter."""
+    #     logger.debug("Getting CountingBloomFilter size")
+    #     return (
+    #         sys.getsizeof(self) +
+    #         sys.getsizeof(self.__counter_array) +
+    #         sys.getsizeof(self.__hash_functions) +
+    #         sys.getsizeof(self.__key_num) +
+    #         sys.getsizeof(self.__false_positive_rate)
+    #     )
     
     def min_count(self, item) -> int:
         """Gets the minimum value stored corresponding to an item."""

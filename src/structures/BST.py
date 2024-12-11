@@ -82,8 +82,8 @@ class BST:
                 count += self.__right.get_subtree_size()
             return count
         
-        def size(self)->int:
-            return sys.getsizeof(self) + sys.getsizeof(self.__key) + sys.getsizeof(self.__left) + sys.getsizeof(self.__right) + sys.getsizeof(self.__parent)
+        # def size(self)->int:
+        #     return sys.getsizeof(self) + sys.getsizeof(self.__key) + sys.getsizeof(self.__value) + sys.getsizeof(self.__left) + sys.getsizeof(self.__right) + sys.getsizeof(self.__parent)
         
     def __init__(self, root=None):
         '''Initializes the tree by setting the root node to None.'''
@@ -278,5 +278,5 @@ class BST:
         logger.debug("Target node is removed, removing subtree is %s", subtree)
         return curr
 
-    def size(self)->int:
-        return sys.getsizeof(self) + sum([node.size() for node in self.get_nodes_as_list()])
+    # def size(self)->int:
+    #     return sys.getsizeof(self) + sum([node.size() for node in self.get_nodes_as_list()])

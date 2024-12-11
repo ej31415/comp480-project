@@ -1,5 +1,11 @@
-# COMP480 Project
+# COMP480 Project - Benchmark Structures to Optimize User-Data Storage System
 *(under construction)*
+
+### Required Packages
+- glob2
+- numpy
+- pandas
+- pympler
 
 Implement and benchmark probabilistic querying with the following implementations:
 
@@ -21,6 +27,6 @@ Implement and benchmark probabilistic querying with the following implementation
 Our metrics for evaluating the performance of the above structures will use:
 - time requirement
 - space requirement
-- F1 score (precision and recall
+- false positive rate -- specifically for filters
 
 The same operations will be run with a hash map as a baseline, control group test.
