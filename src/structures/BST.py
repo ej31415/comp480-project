@@ -151,7 +151,7 @@ class BST:
         This function will only be called internally, so the node is guaranteed to exist.
         """
         if node.get_right_child() != None:
-            return node.get_right_child().min_node()
+            return self.min_node(node.get_right_child())
         
         curr = node
         next = curr.get_parent()
@@ -229,8 +229,8 @@ class BST:
         logger.debug("Target node is NOT found")
         return None
     
-    def remove(self, item, subtree=False):
-        """Removes the node that contains item as its key.
+    def remove(self, key, subtree=False):
+        """Removes the node that contains `key` as its key.
         `subtree` is an optional boolean parameter that removes either only the node if False or the node and its subtree if True.
         
         If `subtree` is True, the function returns the node with its subtree. Otherwise, only the node is returned.
@@ -240,9 +240,9 @@ class BST:
         curr = self.__root
         while curr != None:
             curr_key = curr.get_key()
-            if item < curr_key:
+            if key < curr_key:
                 curr = curr.get_left_child()
-            elif item > curr_key:
+            elif key > curr_key:
                 curr = curr.get_right_child()
             else:
                 break
@@ -259,7 +259,7 @@ class BST:
             elif curr.get_right_child() == None:
                 self.__transplant(curr, curr.get_left_child())
             else:
-                successor = curr.get_right_child().min_node()
+                successor = self.min_node(curr.get_right_child())
                 if successor.get_parent() != curr:
                     self.__transplant(successor, successor.get_right_child())
                     successor.set_right_child(curr.get_right_child())
