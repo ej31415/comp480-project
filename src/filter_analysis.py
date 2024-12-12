@@ -69,13 +69,15 @@ sub_size_ratios = [0.1, 0.5, 0.9, 1]  # Varying sub-sizes
 
 # Helper function to collect data
 def collect_data(filter_name, metric, value, size, load_factor):
-    results.append({
+    res = {
         "filter": filter_name,
         "size": size,
         "load_factor": load_factor,
         "metric": metric,
         "value": value,
-    })
+    }
+    print(res)
+    results.append(res)
 
 # Helper function to plot graphs
 def plot_graphs(results):
