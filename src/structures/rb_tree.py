@@ -306,12 +306,12 @@ class RBTree:
         """Finds and returns the successor of a node.
         This function will only be called internally, so the node is guaranteed to exist.
         """
-        if node.get_right_child() != None:
-            return node.get_right_child().min_node()
+        if node.get_right_child() != self.__null:
+            return self.min_node(node.get_right_child())
         
         curr = node
         next = curr.get_parent()
-        while next != None and curr == next.get_right_child():
+        while next != self.__null and curr == next.get_right_child():
             curr = next
             next = next.get_parent()
         return next
@@ -365,17 +365,34 @@ class RBTree:
         logger.debug("Item is not not found")
         return 0
     
-    def remove(self, item):
-        """Removes the node that contains item as its key.
-        If the given item does not exist in the BST as a node key, the function returns None.
+    def get(self, item):
+        """Returns the node that stores a given item as the key.
+        If the item does not exist in the BST as a a node key, returns None.
         """
-        # Search for the node to remove
         curr = self.__root
         while curr != self.__null:
             curr_key = curr.get_key()
             if item < curr_key:
                 curr = curr.get_left_child()
             elif item > curr_key:
+                curr = curr.get_right_child()
+            else:
+                logger.debug("Target node is found")
+                return curr
+        logger.debug("Target node is NOT found")
+        return None
+    
+    def remove(self, key):
+        """Removes the node that contains `key` as its key.
+        If the given item does not exist in the BST as a node key, the function returns None.
+        """
+        # Search for the node to remove
+        curr = self.__root
+        while curr != self.__null:
+            curr_key = curr.get_key()
+            if key < curr_key:
+                curr = curr.get_left_child()
+            elif key > curr_key:
                 curr = curr.get_right_child()
             else:
                 break
@@ -391,7 +408,7 @@ class RBTree:
             self.__transplant(curr, curr.get_right_child())
             fix_node = curr.get_right_child()
             curr.set_right_child(None)
-        elif curr.get_right_child() == None:
+        elif curr.get_right_child() == self.__null:
             self.__transplant(curr, curr.get_left_child())
             fix_node = curr.get_left_child()
             curr.set_left_child(None)

@@ -226,13 +226,13 @@ class ConsistentHashing:
         if position == None:
             raise Exception("Given server position is out of range!")
         
-        # Find the next server
         server = self.__ring[position]
         if not server.check_online():
             logger.warning("The specified server is already down.")
             return
         server_next = None
         
+        # Find the next server
         if self.__server_storage == None:
             check_pos = self.__find_next_server_index(position)
             if check_pos == -1:
@@ -246,7 +246,7 @@ class ConsistentHashing:
             if node == succ:
                 raise Exception("No available server!")
             server_next = self.__ring[succ.get_key()]
-            self.__server_storage.remove(node)
+            self.__server_storage.remove(position)
         
         for item in server.get_data().copy():
             server.remove(item)
@@ -278,6 +278,7 @@ class ConsistentHashing:
             server_next = self.__ring[check_pos]
             server_next_idx = check_pos
         else:
+            self.__server_storage.insert(position, value=server)
             node = self.__server_storage.get(position)
             succ = self.__server_storage.successor(node)
             if succ == None:
@@ -285,7 +286,6 @@ class ConsistentHashing:
             if node == succ:
                 raise Exception("No available server!")
             server_next = self.__ring[succ.get_key()]
-            self.__server_storage.remove(node)
         
         for item in server_next.get_data().copy():
             idx = self.find(item)
