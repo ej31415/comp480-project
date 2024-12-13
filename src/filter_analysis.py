@@ -64,8 +64,11 @@ from structures.counting_bloom_filter import CountingBloomFilter
 
 TEST_SPLIT = 0.2  # Test split ratio
 results = []
+# load_factors = [0.9]
+# sub_size_ratios = [0.1]
 load_factors = [0.1, 0.5, 0.9]  # Varying load factors
 sub_size_ratios = [0.1, 0.5, 0.9, 1]  # Varying sub-sizes
+
 
 # Helper function to collect data
 def collect_data(filter_name, metric, value, size, load_factor):
@@ -79,48 +82,148 @@ def collect_data(filter_name, metric, value, size, load_factor):
     print(res)
     results.append(res)
 
-# Helper function to plot graphs
-def plot_graphs(results):
+# for one filter, see how load factor and data size impact performances
+def generate_metric_tables_for_filter(results, filter):
+    metric_names = ["Insertion Time", "Query Time", "False Positive Rate", "Memory Usage"]
+    metrics = ["insertion_time", "query_time", "false_positive_rate", "memory_usage"]
+    
+    for i in range(len(metrics)):
+        print("\n\n\n")
+        print("\\begin{table}")
+        generate_metric_table_for_filter(results, filter, metric_names[i], metrics[i])
+        print("\\end{table}")
+        print("\n\n\n")
+
+def generate_metric_table_for_filter(results, filter, metric_name, metric):
+    subset = [r for r in results if r['filter'] == filter and r['metric'] == metric]
+    sizes = sorted(set([r["size"] for r in results]))
+    load_factors = sorted(set([r["load_factor"] for r in results]))
+    print("\n\n\n")
+    print("\\begin{tabular}{lcccc}")
+    print("\\toprule")
+
+    # construct the top row
+    col = "\\textbf{Dataset Size =} "
+    for size in sizes:
+        col += "& \\textbf{ " + f"{size}" +" } "
+    col += "\\\\"
+    print(col)
+    print("\midrule")
+
+    for load_factor in load_factors:
+        row = "Load Factor = " + f"{load_factor}"
+        for size in sizes:
+            res = [r['value'] for r in subset if r['load_factor'] == load_factor and r['size']== size]
+            if len(res) != 1:
+                print(res)
+                print("error getting value")
+                return
+            res_val = "{0:.4f}".format(res[0])
+            row += " & " + f"{res_val}"
+        row += "\\" + "\\"
+        print(row)
+    print("\\bottomrule")
+    print("\end{tabular}")
+    print("\\caption{" +f"{metric_name}"+ " Table for " f"{filter} Filter" + "}")
+    filter_name = filter.lower().replace(" ","_")
+    print("\\label{tab:" +f"{filter_name}" + "_" + f"{metric}"+ "}")
+
+
+# # Helper function to plot graphs
+# def generate_insert_latex_table(results):
+#     metrics = ["insertion_time", "memory_usage"]
+#     filters = set([r["filter"] for r in results])
+#     sizes = sorted(set([r["size"] for r in results]))
+#     load_factors = sorted(set([r["load_factor"] for r in results]))
+
+#     # Scalability test under different load factors
+#     for load_factor in load_factors:
+#         for size in sizes:
+#             controlled_set = [r for r in results if r['load_factor'] == load_factor and r['size']== size]
+#             print("\\textbf{Load Factor = " + f"{load_factor}" + " Dataset Count = " + f"{size}"+ "}")
+#             print("\\begin{tabular}{lcc}")
+#             print("\\toprule")
+#             print("\\textbf{Filter Type} & \\textbf{Insertion Time} & \\textbf{Memory Usage(bytes)} \\\\")
+#             print("\midrule")
+#             for filter_name in filters:
+#                 row = f"${filter_name} Filter "
+#                 filter_metrics = [r for r in controlled_set if r['filter'] == filter_name]
+#                 # print(filter_metrics)
+#                 for metric in metrics:
+#                     filter_metric = [r for r in filter_metrics if r['metric'] == metric]
+#                     if len(filter_metric) != 1:
+#                         print(filter_metric)
+#                         print("Error Selecting Row")
+#                     row += f"& {filter_metric[0]['value']} "
+#                 row += "\\"
+#                 print(row)
+#             print("\\bottomrule")
+#             print("\end{tabular}")
+#             print("\n\n\n\n\n")
+
+
+# def generate_query_latex_table(results):
+#     metrics = ["query_time", "false_positive_rate"]
+#     filters = set([r["filter"] for r in results])
+#     sizes = sorted(set([r["size"] for r in results]))
+#     load_factors = sorted(set([r["load_factor"] for r in results]))
+
+#     # Scalability test under different load factors
+#     for load_factor in load_factors:
+#         for size in sizes:
+#             controlled_set = [r for r in results if r['load_factor'] == load_factor and r['size']== size]
+#             print("\\textbf{Load Factor = " + f"{load_factor}" + " Dataset Count = " + f"{size}" + "}")
+#             print("\\begin{tabular}{lcc}")
+#             print("\\toprule")
+#             print("\\textbf{Filter Type} & \\textbf{Query Time} & \textbf{False Positive} \\\\")
+#             print("\midrule")
+#             for filter_name in filters:
+#                 row = f"${filter_name} Filter "
+#                 filter_metrics = [r for r in controlled_set if r['filter'] == filter_name]
+#                 # print(filter_metrics)
+#                 for metric in metrics:
+#                     filter_metric = [r for r in filter_metrics if r['metric'] == metric]
+#                     if len(filter_metric) != 1:
+#                         print(filter_metric)
+#                         print("Error Selecting Row")
+#                     row += f"& {filter_metric[0]['value']} "
+#                 row += "\\"
+#                 print(row)
+#             print("\\bottomrule")
+#             print("\end{tabular}")
+#             print("\n\n\n\n\n")
+
+def generate_query_latex_table(results):
     metrics = ["insertion_time", "query_time", "false_positive_rate", "memory_usage"]
     filters = set([r["filter"] for r in results])
     sizes = sorted(set([r["size"] for r in results]))
     load_factors = sorted(set([r["load_factor"] for r in results]))
-    
-    # Plot grouped by filter size
-    for metric in metrics:
-        plt.figure(figsize=(12, 8))
-        for size in sizes:
-            subset = [r for r in results if r["size"] == size and r["metric"] == metric]
-            for filter_name in filters:
-                data = [r for r in subset if r["filter"] == filter_name]
-                x = [r["load_factor"] for r in data]
-                y = [r["value"] for r in data]
-                plt.plot(x, y, marker='o', label=f"{filter_name} (Size={size})")
-        plt.title(f"{metric.replace('_', ' ').capitalize()} by Load Factor (Grouped by Size)")
-        plt.xlabel("Load Factor")
-        plt.ylabel(metric.replace('_', ' ').capitalize())
-        plt.legend()
-        plt.grid()
-        plt.savefig(f"{metric}_by_size.png")
-        plt.show()
 
-    # Plot grouped by load factor
-    for metric in metrics:
-        plt.figure(figsize=(12, 8))
-        for load_factor in load_factors:
-            subset = [r for r in results if r["load_factor"] == load_factor and r["metric"] == metric]
+    # Scalability test under different load factors
+    for load_factor in load_factors:
+        for size in sizes:
+            controlled_set = [r for r in results if r['load_factor'] == load_factor and r['size']== size]
+            print('\n\n\n\n\n')
+            print("\\textbf{Load Factor = " + f"{load_factor}" + " Dataset Count = " + f"{size}"+ "}")
+            print("\\begin{tabular}{lcccc}")
+            print("\\toprule")
+            print("\\textbf{Filter Type} & \\textbf{Insertion Time} & \\textbf{Query Time} & \textbf{False Positive}  & \\textbf{Memory Usage(bytes)} \\\\")
+            print("\midrule")
             for filter_name in filters:
-                data = [r for r in subset if r["filter"] == filter_name]
-                x = [r["size"] for r in data]
-                y = [r["value"] for r in data]
-                plt.plot(x, y, marker='o', label=f"{filter_name} (Load Factor={load_factor})")
-        plt.title(f"{metric.replace('_', ' ').capitalize()} by Size (Grouped by Load Factor)")
-        plt.xlabel("Filter Size")
-        plt.ylabel(metric.replace('_', ' ').capitalize())
-        plt.legend()
-        plt.grid()
-        plt.savefig(f"{metric}_by_load_factor.png")
-        plt.show()
+                row = f"${filter_name} Filter "
+                filter_metrics = [r for r in controlled_set if r['filter'] == filter_name]
+                # print(filter_metrics)
+                for metric in metrics:
+                    filter_metric = [r for r in filter_metrics if r['metric'] == metric]
+                    if len(filter_metric) != 1:
+                        print(filter_metric)
+                        print("Error Selecting Row")
+                    row += f"& {filter_metric[0]['value']} "
+                row += "\\\\"
+                print(row)
+            print("\\bottomrule")
+            print("\end{tabular}")
+            print("\n\n\n\n\n")
 
 # Modify `insert_filter` and `query_filter_false_positive` to collect data
 def insert_filter(filter_name, filter_obj, data, size, load_factor):
@@ -135,13 +238,13 @@ def insert_filter(filter_name, filter_obj, data, size, load_factor):
     collect_data(filter_name, "memory_usage", memory_usage, size, load_factor)
     return duration, memory_usage
 
-def query_filter_false_positive(filter_name, filter_obj, not_inserted, load_factor):
+def query_filter_false_positive(filter_name, filter_obj, not_inserted, size, load_factor):
     start = time.time()
     false_positives = sum(filter_obj.query(name) for name in not_inserted)
     duration = time.time() - start
     false_positive_rate = false_positives / len(not_inserted)
-    collect_data(filter_name, "query_time", duration, len(not_inserted), load_factor)
-    collect_data(filter_name, "false_positive_rate", false_positive_rate, len(not_inserted), load_factor)
+    collect_data(filter_name, "query_time", duration, size, load_factor)
+    collect_data(filter_name, "false_positive_rate", false_positive_rate, size, load_factor)
     return false_positive_rate, duration
 
 def run_experiment(names, load_factors, sub_size_ratios):
@@ -186,13 +289,21 @@ def run_experiment(names, load_factors, sub_size_ratios):
             # query filters
             #######
 
-            query_filter_false_positive("Cuckoo", cuckoo, test, load_factor)
-            query_filter_false_positive("Bloom", bf, test, load_factor)
-            query_filter_false_positive("Counting Bloom", cbf, test, load_factor)
+            query_filter_false_positive("Cuckoo", cuckoo, test,data_size, load_factor)
+            query_filter_false_positive("Bloom", bf, test,data_size, load_factor)
+            query_filter_false_positive("Counting Bloom", cbf, test,data_size, load_factor)
 
 # Run experiments and plot graphs
 run_experiment(load_names_from_files("data/names/*.txt"), load_factors, sub_size_ratios)
-plot_graphs(results)
+
+# #performance/scalability table for one filter
+generate_metric_tables_for_filter(results, "Cuckoo" )
+generate_metric_tables_for_filter(results, "Bloom" )
+generate_metric_tables_for_filter(results, "Counting Bloom" )
+
+#performance table across three filters
+generate_query_latex_table(results)
+
 
 
             
