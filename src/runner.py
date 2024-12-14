@@ -119,9 +119,10 @@ def benchmark_insertion():
 			systems[f"counting_bloom({rate})-{'simple' if tree=='' else tree}_ch"] = System(CountingBloomFilter(false_positive_rate=rate, key_num=103600), ConsistentHashing(ring_size=1000000, num_servers=10000, tree=tree))
 			end = time.time()
 			overheads[f"counting_bloom({rate})-{'simple' if tree=='' else tree}_ch"] = end - start
-			# start = time.time()
-			# systems[f"cuckoo_filter({rate})-{'simple' if tree=='' else tree}_ch"] = System(BloomFilterSimple(false_positive_rate=rate, key_num=103600), ConsistentHashing(ring_size=2000000, num_servers=100000, tree=tree))
-			# end = time.time()
+			start = time.time()
+			systems[f"cuckoo_filter({rate})-{'simple' if tree=='' else tree}_ch"] = System(CuckooFilter(bucket_size=6, num_buckets=20370, fingerprint_size=6, max_evictions=500), ConsistentHashing(ring_size=1000000, num_servers=10000, tree=tree))
+			end = time.time()
+			overheads[f"cuckoo_filter({rate})-{'simple' if tree=='' else tree}_ch"] = end - start
 
 	# Do some operations
 	print("Begin benchmarking")
@@ -295,5 +296,5 @@ def benchmark_consistent_hashing_simulation(fail_probability=0.2, time_steps=100
 	plt.savefig("plots/consistent_hashing_set_sim.png")
 	plt.clf()
 
-# benchmark_insertion()
-benchmark_consistent_hashing_simulation()
+benchmark_insertion()
+# benchmark_consistent_hashing_simulation()
