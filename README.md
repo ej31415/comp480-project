@@ -1,5 +1,4 @@
-# COMP480 Project - Benchmark Structures to Optimize User-Data Storage System
-
+# COMP 480 Project - Exploring Optimal Probabilistic Structures in Username-Data Storage System
 The final report is in `Final Report.pdf`. All scripts are in `src`. The data we use are in a [folder](https://drive.google.com/drive/folders/1QlqHM1dzgo4tfRY_ejGUDBZQyGWy885z?usp=sharing). The generated plots are in `plots`. The output logs for insertion tests with systems is in `insertion_log.txt`.
 
 ### Required Packages
